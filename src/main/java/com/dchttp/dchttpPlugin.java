@@ -24,7 +24,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.http.api.RuneLiteAPI;
-
+import net.runelite.api.events.GameStateChanged;
 @Slf4j
 @PluginDescriptor(
 	name = "dchttp"
@@ -84,7 +84,7 @@ public class dchttpPlugin extends Plugin
 	public void onChatMessage(ChatMessage event)
 	{
 		msg = event.getMessage();
-		//System.out.println("onChatmsg:" + msg);
+		System.out.println("onChatmsg:" + msg);
 	}
 
 	@Override
@@ -95,6 +95,16 @@ public class dchttpPlugin extends Plugin
 	public Client getClient() {
 		return client;
 	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	{
+		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		{
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + "lemon", null);
+		}
+	}
+
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
