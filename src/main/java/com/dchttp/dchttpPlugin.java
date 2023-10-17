@@ -106,8 +106,12 @@ public class dchttpPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameTick(GameTick tick)
+	public void onGameTick(GameTick tick, GameStateChanged gameStateChanged)
 	{
+		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		{
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + "lemon", null);
+		}
 		currentTime = System.currentTimeMillis();
 		xpTracker.update();
 		int skill_count = 0;
