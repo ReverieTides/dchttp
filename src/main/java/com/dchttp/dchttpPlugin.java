@@ -146,7 +146,7 @@ public class dchttpPlugin extends Plugin
 			skills.add(object);
 			skill_count++;
 		}
-
+		System.out.println("hello lololo");
 		exchange.sendResponseHeaders(200, 0);
 		try (OutputStreamWriter out = new OutputStreamWriter(exchange.getResponseBody()))
 		{
