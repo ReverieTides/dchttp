@@ -1,4 +1,4 @@
-package com.example;
+package com.dchttp;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
