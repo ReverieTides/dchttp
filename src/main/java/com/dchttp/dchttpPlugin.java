@@ -84,6 +84,12 @@ public class dchttpPlugin extends Plugin
 	public void onChatMessage(ChatMessage event)
 	{
 		msg = event.getMessage();
+		if (msg.equals("1")) {
+			System.out.println("triggered");
+
+		}
+
+
 		System.out.println("onChatmsg:" + msg);
 	}
 
@@ -105,13 +111,13 @@ public class dchttpPlugin extends Plugin
 		}
 	}
 
+	public GameStateChanged gameStateChanged;
+
 	@Subscribe
-	public void onGameTick(GameTick tick, GameStateChanged gameStateChanged)
+	public void onGameTick(GameTick tick)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + "lemon", null);
-		}
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", client.getMouseCanvasPosition().toString(), null);
+
 		currentTime = System.currentTimeMillis();
 		xpTracker.update();
 		int skill_count = 0;
