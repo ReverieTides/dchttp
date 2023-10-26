@@ -123,7 +123,7 @@ public class dchttpPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", client.getMouseCanvasPosition().toString(), null);
+		//client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", client.getMouseCanvasPosition().toString(), null);
 
 		currentTime = System.currentTimeMillis();
 		xpTracker.update();
