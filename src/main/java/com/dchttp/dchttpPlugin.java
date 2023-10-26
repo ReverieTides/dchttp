@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+
+import java.awt.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.time.Duration;
@@ -25,6 +27,18 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.http.api.RuneLiteAPI;
 import net.runelite.api.events.GameStateChanged;
+
+import net.runelite.api.Client;
+import net.runelite.api.Perspective;
+import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.Scene;
+import net.runelite.api.SceneTileModel;
+import net.runelite.api.SceneTilePaint;
+import net.runelite.api.TileObject;
+import net.runelite.api.Actor;
+
+
 @Slf4j
 @PluginDescriptor(
 	name = "dchttp"
@@ -81,17 +95,10 @@ public class dchttpPlugin extends Plugin
 		}
 	}
 	@Subscribe
-	public void onChatMessage(ChatMessage event)
-	{
-		msg = event.getMessage();
-		if (msg.equals("1")) {
-			System.out.println("triggered");
-
-		}
-
-
-		System.out.println("onChatmsg:" + msg);
-	}
+	public void onChatMessage(ChatMessage event) {
+        msg = event.getMessage();
+        System.out.println("onChatmsg:" + msg);
+    }
 
 	@Override
 	protected void shutDown() throws Exception
@@ -147,8 +154,8 @@ public class dchttpPlugin extends Plugin
 		Player player = client.getLocalPlayer();
 		JsonArray skills = new JsonArray();
 		JsonObject headers = new JsonObject();
-		headers.addProperty("username", client.getUsername());
-		headers.addProperty("player name", player.getName());
+		headers.addProperty("username", "rice@google.com");
+		headers.addProperty("player name", "TURBO MAX");
 		int skill_count = 0;
 		skills.add(headers);
 		for (Skill skill : Skill.values())
@@ -166,7 +173,6 @@ public class dchttpPlugin extends Plugin
 			skills.add(object);
 			skill_count++;
 		}
-		System.out.println("hello lololo");
 		exchange.sendResponseHeaders(200, 0);
 		try (OutputStreamWriter out = new OutputStreamWriter(exchange.getResponseBody()))
 		{
@@ -188,6 +194,9 @@ public class dchttpPlugin extends Plugin
 		if (npc != null)
 		{
 			npcName = npc.getName();
+			Polygon npc_canvas = npc.getCanvasTilePoly();
+			System.out.println(npc_canvas);
+
 			npcHealth = npc.getHealthScale();
 			npcHealth2 = npc.getHealthRatio();
 			health = 0;
@@ -225,20 +234,31 @@ public class dchttpPlugin extends Plugin
 			npcHealth2 = 0;
 			health = 0;
 		}
-		JsonObject object = new JsonObject();
+		JsonObject localNpcs = new JsonObject();
+		for (NPC each_npc : client.getNpcs()) {
+			String name = each_npc.getName();
+
+			// Add the name to the JSON object
+			localNpcs.addProperty("name", name);
+		}
+
+		JsonObject return_package = new JsonObject();
 		JsonObject camera = new JsonObject();
 		JsonObject worldPoint = new JsonObject();
 		JsonObject mouse = new JsonObject();
-		object.addProperty("animation", player.getAnimation());
-		object.addProperty("animation pose", player.getPoseAnimation());
-		object.addProperty("latest msg", msg);
-		object.addProperty("run energy", client.getEnergy());
-		object.addProperty("game tick", client.getGameCycle());
-		object.addProperty("health", client.getBoostedSkillLevel(Skill.HITPOINTS) + "/" + client.getRealSkillLevel(Skill.HITPOINTS));
-		object.addProperty("interacting code", String.valueOf(player.getInteracting()));
-		object.addProperty("npc name", npcName);
-		object.addProperty("npc health ", minHealth);
-		object.addProperty("MAX_DISTANCE", MAX_DISTANCE);
+		return_package.addProperty("overhead", player.getOverheadIcon().name());
+		return_package.addProperty("animation", player.getAnimation());
+		return_package.addProperty("animation pose", player.getPoseAnimation());
+		return_package.addProperty("latest msg", msg);
+		return_package.addProperty("run energy", client.getEnergy());
+		return_package.addProperty("weight", client.getWeight());
+		return_package.addProperty("game tick", client.getGameCycle());
+		return_package.addProperty("health", client.getBoostedSkillLevel(Skill.HITPOINTS));
+		return_package.addProperty("interacting code", String.valueOf(player.getInteracting()));
+		return_package.addProperty("npc name", npcName);
+		return_package.add("local_npcs", localNpcs);
+		return_package.addProperty("npc health ", minHealth);
+		return_package.addProperty("MAX_DISTANCE", MAX_DISTANCE);
 		mouse.addProperty("x", client.getMouseCanvasPosition().getX());
 		mouse.addProperty("y", client.getMouseCanvasPosition().getY());
 		worldPoint.addProperty("x", player.getWorldLocation().getX());
@@ -255,13 +275,13 @@ public class dchttpPlugin extends Plugin
 		camera.addProperty("x2", client.getCameraX2());
 		camera.addProperty("y2", client.getCameraY2());
 		camera.addProperty("z2", client.getCameraZ2());
-		object.add("worldPoint", worldPoint);
-		object.add("camera", camera);
-		object.add("mouse", mouse);
+		return_package.add("worldPoint", worldPoint);
+		return_package.add("camera", camera);
+		return_package.add("mouse", mouse);
 		exchange.sendResponseHeaders(200, 0);
 		try (OutputStreamWriter out = new OutputStreamWriter(exchange.getResponseBody()))
 		{
-			RuneLiteAPI.GSON.toJson(object, out);
+			RuneLiteAPI.GSON.toJson(return_package, out);
 		}
 	}
 	private HttpHandler handlerForInv(InventoryID inventoryID)
